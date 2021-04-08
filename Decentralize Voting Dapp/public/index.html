@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <title class="winner">election/voting dApp</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <link rel="shortcut icon" href="#">
+    <style type="text/css">
+        #footer {
+            position:absolute;
+            bottom:0;
+            width:100%;
+            height:50px;
+        }
+    </style>
+</head>
+<body class="text-secondary font-weight-light">
+	<nav class="navbar navbar-dark bg-dark">
+	    <a class="navbar-brand" href="#">
+            <h3 class="winner">Digital Ballot Paper</h3>
+	    </a>
+		<span class="navbar-brand mb-0"></span>
+	</nav>
+    <div class="container mt-5">
+    	<center>
+	    	<div class="col-md-5">
+                <table class="table">
+                  <thead>
+                    <tr align="center">
+                      <th scope="col">Candidates</th>
+                      <th scope="col" id="cad1">SORRY VOTEING</th>
+                      <th scope="col" id="cad2">TIME IS OVER!</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr align="center">
+                      <th scope="row"> Photos </th>
+                      <td scope="col"><img src="https://centraljersey.com/wp-content/uploads/sites/26/2020/08/DYK_TRUMP.jpg" alt="" border=3 height=150 width=150></img></th></td>
+                      <td scope="col"><img src="https://centraljersey.com/wp-content/uploads/sites/26/2020/08/DYK_Biden.jpg" alt="" border=1 height=150 width=150></img></th></td>
+                    </tr>
+                    <tr align="center">
+                      <th scope="row">Votes</th>
+                      <td id="cad1count">x</td>
+                      <td id="cad2count">x</td>
+                    </tr>
+                    <tr align="center">
+                      <th scope="row"></th>
+                      <td><button id="hide_button_1" onclick="Vote(1)" class="btn btn-primary">Vote</button></td>
+                      <td><button id="hide_button_2" onclick="Vote(2)" class="btn btn-primary">Vote</button></td>
+                    </tr>
+                    <tr align="center">
+                      <th scope="row"></th>
+                      <!--<td><button id="show_button" align="center" onclick="Win()" class="btn btn-primary">Winner(ADMIN)</button></td>-->
+                      <td><button id="show_button" align="center" onclick="Shutdown()" class="btn btn-primary">SHUTDOWN</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+	    	</div>
+    	</center>
+        <hr>
+    </div>
+    <nav id="footer" class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">
+            <p class="winner" class="small mt-5">Happy  <i class="fas fa-heart mr-1 text-danger"></i><a href="#" class="font-weight-bold text-danger" target="_blank"> Voting</a></p>
+        </a>
+        <span class="navbar-brand mb-0"></span>
+    </nav>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/js/all.min.js" integrity="sha256-qM7QTJSlvtPSxVRjVWNM2OfTAz/3k5ovHOKmKXuYMO4=" crossorigin="anonymous"></script>
+    <script src="js/contract.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
+    <script>
+        var myContract;
+        async function CheckMetamaskConnection() {
+            // Modern dapp browsers...
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                try {
+                    // Request account access if needed
+                    await ethereum.enable();
+                    // Acccounts now exposed
+                    return true;
+                } catch (error) {
+                    // User denied account access...
+                    return false;
+                }
+            }
+            // Legacy dapp browsers...
+            else if (window.web3) {
+                window.web3 = new Web3(web3.currentProvider);
+                // Acccounts always exposed
+                return true;
+            }
+            // Non-dapp browsers...
+            else {
+                console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+                return false;
+            }
+        }
+        $(document).ready(async function () {
+            var IsMetamask = await CheckMetamaskConnection();
+            if (IsMetamask) {
+                console.log("Metamask detected!")
+                myContract = await web3.eth.contract(SmartContractABI).at(SmartContractAddress);
+                console.log("myContract :", myContract);
+                State();
+                console.log(State());
+                getCandidate(1);
+                getCandidate(2);
+                console.log(getCandidate(1));
+                console.log(getCandidate(2));
+                await myContract.eventVote({
+                    fromBlock:0
+                }, function(err, event){
+                    console.log("event :", event);
+                    getCandidate(event.args._candidateid.toNumber());
+                });
+            } else {
+                console.log("Metamask not detected : ", err);
+                Swal.fire({
+				  icon: 'error',
+				  title: 'Oops...',
+				  text: 'Metamask not detected!',
+				  onClose() {
+				  	location.reload();
+				  }
+				});
+            }
+        });
+        async function State(){
+            await myContract.state( function(err, result){
+                if(!err){
+                    console.log("state result : ", result);
+                    if(result) {
+                        document.getElementById('show_button').style.display = 'block';
+                    } else {
+                        document.getElementById('show_button').style.display = 'none';
+                    }
+                } else {
+                    console.log("state error : ", err);
+                }
+            });
+        }
+        async function getCandidate(cad){
+            await myContract.candidates(cad, function(err, result){
+                if (!err) {
+                    console.log("getCandidate result : ", result);
+                    document.getElementById("cad" + cad).innerHTML = result[1];
+                    document.getElementById("cad"+cad+'count').innerHTML = result[2].toNumber();
+                } else {
+                    console.log("getCandidate error : ", err);
+                }
+            });
+        }
+        async function Vote(cad){
+            await myContract.vote(cad, function(err, result){
+                if(!err){
+                    console.log("vote result : ", result);
+                    if(result) {
+                        document.getElementById('hide_button_1').style.display = 'none';
+                        document.getElementById('hide_button_2').style.display = 'none';
+                    } else {
+                        document.getElementById('hide_button_1').style.display = 'block';
+                        document.getElementById('hide_button_2').style.display = 'block';
+                    }
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Your Vote is Processing...',
+                        showConfirmButton: false,
+                        timer: 3800
+                    });
+                } else {
+                    console.log("vote error : ", err);
+                }
+            });
+        }
+        async function Win(){
+            await myContract.win( function(err, result){
+                if(!err){
+                    console.log("win result : ", result);
+                    alert("The winner is : " + result + "( from SMART-CONTRACT )"); 
+                    document.write("<h1>THANK YOU FOR VOTING!!!</h1>");  
+                } else {
+                    console.log("win error : ", err);
+                }
+            });
+        }
+        async function Shutdown() {
+            await myContract.shutdown( function(err, result) {
+                if(!err) {
+                    console.log("shutdown-winner result : ", result);
+                    var x = document.getElementById("cad1count").innerHTML;
+                    var m = parseInt(x, 10);
+                    var y = document.getElementById("cad2count").innerHTML;
+                    var n = parseInt(y, 10);
+                    if(m > n) {
+                        for ( const element of document.getElementsByClassName("winner")) {
+                            element.innerHTML = "The winner is : TRUMP";
+                        }
+                        Swal.fire(
+                          'Congratulations!',
+                          'The Winner is TRUMP!',
+                          'success'
+                        );
+                        //alert("The Winner is TRUMP!");
+                    } else if (m == n) {
+                        for ( const element of document.getElementsByClassName("winner")) {
+                            element.innerHTML = "The Result is : DRAW";
+                        }
+                        Swal.fire('It is a Draw!');
+                        //alert("It's a Draw!");
+                    } else {
+                        for ( const element of document.getElementsByClassName("winner")) {
+                            element.innerHTML = "The winner is : BIDEN";
+                        }
+                        Swal.fire({
+                            title: 'Congratulations!',
+                            text: 'The Winner is BIDEN!!',
+                            imageUrl: 'https://centraljersey.com/wp-content/uploads/sites/26/2020/08/DYK_Biden.jpg',
+                            imageWidth: 400,
+                            imageHeight: 200,
+                            imageAlt: 'Trump',
+                        });
+                        //alert("The Winner is BIDEN!");
+                    }
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Time is Over!',
+                      text: 'Sorry, you can not vote now!',
+                      onClose() {
+                        let timerInterval
+                        Swal.fire({
+                        title: 'Thank You For Voting!',
+                        html: 'See You Next Time!',
+                        timer: 3800,
+                        timerProgressBar: true,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                        Swal.showLoading()
+                        timerInterval = setInterval(() => {
+                          const content = Swal.getContent()
+                          if (content) {
+                            const b = content.querySelector('b')
+                            if (b) {
+                              b.textContent = Swal.getTimerLeft()
+                            }
+                          }
+                        }, 100)
+                        },
+                        willClose: () => {
+                        clearInterval(timerInterval)
+                        }
+                        }).then((result) => {
+                        /* Read more about handling dismissals below */
+                        if (result.dismiss === Swal.DismissReason.timer) {
+                        console.log('I was closed by the timer')
+                        }
+                        })
+                      }
+                    });
+                } else {
+                    console.log("shutdown error : ", err);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
