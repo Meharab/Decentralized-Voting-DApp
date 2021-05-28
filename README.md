@@ -6,17 +6,28 @@ Decentralized-Voting-Dapp is a web base dapp that ensures any organization to pe
 
 # Software Requirements
 
-#### Front-End Programming Language: HTML, CSS, JavaScript
-#### Front-End Frameworks : Bootstrap, jQuery
-#### Back-End Programming Language: JavaScript, PHP
-#### Back-End Frameworks : Express.js
-#### Back-End servers : Node.js, Xampp 
-#### Smart-Contact Programming Language : Solidity 
-#### Smart-Contact Framework : Remix
-#### Blockchain : Ethereum 
-#### Blockchain Wallet : Metamax 
-#### Blockchain Interaction Library : web3.js
-#### Local Blockchain Platform : Ganache 
+#### Front-End Programming Language: 
+    HTML, CSS, JavaScript
+#### Front-End Frameworks : 
+    Bootstrap, jQuery
+#### Back-End Programming Language: 
+    JavaScript, PHP
+#### Back-End Frameworks : 
+    Express.js
+#### Back-End servers : 
+    Node.js, Xampp 
+#### Smart-Contact Programming Language : 
+    Solidity 
+#### Smart-Contact Framework : 
+    Remix
+#### Blockchain : 
+    Ethereum 
+#### Blockchain Wallet : 
+    Metamax 
+#### Blockchain Interaction Library : 
+    web3.js
+#### Local Blockchain Platform : 
+    Ganache 
 
 # App Preview
 
